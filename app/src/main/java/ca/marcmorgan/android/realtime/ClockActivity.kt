@@ -15,19 +15,19 @@ import org.threeten.bp.format.DateTimeFormatter
 
 class ClockActivity : AppCompatActivity() {
 
-    companion object {
+    private companion object {
         const val UPDATE_MS: Long = 100
         const val TAG = "ClockActivity"
     }
 
-    var utcTimeTextView: TextView? = null
-    var integralTimeTextView: TextView? = null
-    var dstTimeTextView: TextView? = null
-    var realTimeTextView: TextView? = null
-    val refreshHandler = Handler()
+    private lateinit var utcTimeTextView: TextView
+    private lateinit var integralTimeTextView: TextView
+    private lateinit var dstTimeTextView: TextView
+    private lateinit var realTimeTextView: TextView
+    private val refreshHandler = Handler()
 
-    var location: Location? = null
-    val locationListener = object : LocationListener {
+    private var location: Location? = null
+    private val locationListener = object : LocationListener {
         override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {}
         override fun onProviderEnabled(p0: String?) {}
         override fun onProviderDisabled(p0: String?) {}
@@ -77,9 +77,9 @@ class ClockActivity : AppCompatActivity() {
             utcTime.plusSeconds(longitudeToSeconds(it).toLong())
         }
 
-        utcTimeTextView?.text = utcTime.format(format)
-        integralTimeTextView?.text = integralTime?.format(format) ?: blankTime
-        dstTimeTextView?.text = blankTime
-        realTimeTextView?.text = blankTime
+        utcTimeTextView.text = utcTime.format(format)
+        integralTimeTextView.text = integralTime?.format(format) ?: blankTime
+        dstTimeTextView.text = blankTime
+        realTimeTextView.text = blankTime
     }
 }
