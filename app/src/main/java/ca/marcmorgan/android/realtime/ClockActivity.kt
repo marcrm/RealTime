@@ -2,6 +2,7 @@ package ca.marcmorgan.android.realtime
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.widget.TextView
 import org.threeten.bp.LocalTime
 import org.threeten.bp.ZoneId
@@ -9,10 +10,15 @@ import org.threeten.bp.format.DateTimeFormatter
 
 class ClockActivity : AppCompatActivity() {
 
+    companion object {
+        const val UPDATE_MS: Long = 100
+    }
+
     var utcTimeTextView: TextView? = null
     var integralTimeTextView: TextView? = null
     var dstTimeTextView: TextView? = null
     var realTimeTextView: TextView? = null
+    val refreshHandler = Handler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +30,15 @@ class ClockActivity : AppCompatActivity() {
         realTimeTextView = findViewById(R.id.clock_realtime_time)
 
         updateTime()
+        initTimer()
+    }
+
+    private fun initTimer() {
+        val updateRunnable = Runnable {
+            updateTime()
+            initTimer()
+        }
+        refreshHandler.postDelayed(updateRunnable, UPDATE_MS)
     }
 
     private fun updateTime() {
