@@ -3,6 +3,9 @@ package ca.marcmorgan.android.realtime
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
+import org.threeten.bp.LocalTime
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 
 class ClockActivity : AppCompatActivity() {
 
@@ -25,8 +28,12 @@ class ClockActivity : AppCompatActivity() {
 
     private fun updateTime() {
         val blankTime = getString(R.string.empty_time)
+        val format = DateTimeFormatter.ofPattern("h:mm:ss a")
+        val utcTime = LocalTime.now(ZoneId.of("UTC"))
 
-        for(v in listOf(utcTimeTextView, integralTimeTextView, dstTimeTextView, realTimeTextView)) {
+        utcTimeTextView?.text = utcTime.format(format)
+
+        for(v in listOf(integralTimeTextView, dstTimeTextView, realTimeTextView)) {
             v?.text = blankTime
         }
     }
