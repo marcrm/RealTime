@@ -79,7 +79,7 @@ class ClockActivity : AppCompatActivity() {
 
     private fun dstEnd(year: Int) = LocalDate.of(year, 11, 1).with(FIRST_SUNDAY).atStartOfDay()
 
-    private fun dstToSeconds(): Double {
+    private fun dstToSeconds(): Duration {
         val now = LocalDateTime.now()
         val dstStartThis = dstBegin(now.year)
         val dstEndThis = dstEnd(now.year)
@@ -95,13 +95,13 @@ class ClockActivity : AppCompatActivity() {
         val totalPeriod = Duration.between(start, end).toMillis().toDouble()
         val thisPeriod = Duration.between(start, now).toMillis().toDouble()
         val completion = thisPeriod / totalPeriod
-        val hour = 60.0 * 60.0
+        val hour = 60.0 * 60.0 * 1000.0
         val adjustment = completion * hour
 
         return when {
             isDst -> hour - adjustment
             else -> adjustment
-        }
+        }.let { Duration.ofMillis(it.toLong()) }
     }
 
     private fun checkLocationPermissions() {
@@ -157,25 +157,20 @@ class ClockActivity : AppCompatActivity() {
         refreshHandler.postDelayed(updateRunnable, UPDATE_MS)
     }
 
-    private fun longitudeToSeconds(loc: Location) = (loc.longitude / 180.0) * 12 * 60 * 60
+    private fun longitudeToSeconds(loc: Location) =
+        Duration.ofMillis(((loc.longitude / 180.0) * 12 * 60 * 60 * 1000).toLong())
 
     private fun updateTime() {
         val blankTime = getString(R.string.empty_time)
         val format = DateTimeFormatter.ofPattern("h:mm:ss a")
         val utcTime = LocalTime.now(ZoneId.of("UTC"))
 
-        val integralSeconds = location?.let {
-            longitudeToSeconds(it).toLong()
-        }
-        val dstSeconds = dstToSeconds().toLong()
+        val integralDuration = location?.let { longitudeToSeconds(it) }
+        val dstDuration = dstToSeconds()
 
-        val integralTime = integralSeconds?.let {
-            utcTime.plusSeconds(it)
-        }
-        val dstTime = utcTime.plusSeconds(dstSeconds)
-        val realTime = integralSeconds?.let {
-            utcTime.plusSeconds(it + dstSeconds)
-        }
+        val integralTime = integralDuration?.let { utcTime.plus(integralDuration) }
+        val dstTime = utcTime.plus(dstDuration)
+        val realTime = integralDuration?.let { utcTime.plus(it + dstDuration) }
 
         utcTimeTextView.text = utcTime.format(format)
         integralTimeTextView.text = integralTime?.format(format) ?: blankTime
