@@ -1,14 +1,12 @@
 package ca.marcmorgan.android.realtime
 
-import android.content.Context
 import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.widget.TextView
+import com.google.android.gms.location.*
 import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.TemporalAdjusters
@@ -17,6 +15,8 @@ class ClockActivity : AppCompatActivity() {
 
     private companion object {
         const val UPDATE_MS: Long = 100
+        const val LOC_UPDATE_MS: Long = 10 * 1000
+        const val LOC_UPDATE_FASTEST: Long = 2 * 1000
         const val TAG = "ClockActivity"
     }
 
@@ -27,12 +27,18 @@ class ClockActivity : AppCompatActivity() {
     private val refreshHandler = Handler()
 
     private var location: Location? = null
-    private val locationListener = object : LocationListener {
-        override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {}
-        override fun onProviderEnabled(p0: String?) {}
-        override fun onProviderDisabled(p0: String?) {}
-        override fun onLocationChanged(p0: Location?) {
-            location = p0
+    private val locationRequest = LocationRequest().apply {
+        priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        interval = LOC_UPDATE_MS
+        fastestInterval = LOC_UPDATE_FASTEST
+    }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult?) {
+            locationResult?.lastLocation?.let {
+                Log.d(TAG, "New location: $it")
+                location = it
+            }
         }
     }
 
@@ -45,9 +51,21 @@ class ClockActivity : AppCompatActivity() {
         dstTimeTextView = findViewById(R.id.clock_dst_time)
         realTimeTextView = findViewById(R.id.clock_realtime_time)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         initLocation()
         updateTime()
         initTimer()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        startLocationUpdate()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
     }
 
     private fun dstToSeconds(): Double {
@@ -78,12 +96,27 @@ class ClockActivity : AppCompatActivity() {
     }
 
     private fun initLocation() {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager?
         try {
-            locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
-        } catch (ex: SecurityException) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                lastLoc?.let { location = it }
+            }
+        } catch(ex: SecurityException) {
             Log.d(TAG, "location not permitted")
         }
+    }
+
+    private fun startLocationUpdate() {
+        Log.d(TAG, "starting location updates")
+        try {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        } catch(ex: SecurityException) {
+            Log.d(TAG, "location not permitted")
+        }
+    }
+
+    private fun stopLocationUpdates() {
+        Log.d(TAG, "stopping location updates")
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private fun initTimer() {
