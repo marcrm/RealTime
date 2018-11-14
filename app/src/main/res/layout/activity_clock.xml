@@ -15,6 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/utc_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
     />
 
     <TextView
@@ -26,10 +27,12 @@
     />
 
     <TextView
+            android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/integral_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
     />
 
     <TextView
@@ -41,10 +44,12 @@
     />
 
     <TextView
+            android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/dst_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
     />
 
     <TextView
@@ -56,10 +61,12 @@
     />
 
     <TextView
+            android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:text="@string/realtime_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
     />
 
     <TextView
