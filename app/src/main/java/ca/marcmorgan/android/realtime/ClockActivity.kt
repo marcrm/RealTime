@@ -9,9 +9,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.widget.TextView
-import org.threeten.bp.LocalTime
-import org.threeten.bp.ZoneId
+import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.temporal.TemporalAdjusters
 
 class ClockActivity : AppCompatActivity() {
 
@@ -50,6 +50,33 @@ class ClockActivity : AppCompatActivity() {
         initTimer()
     }
 
+    private fun dstToSeconds(): Double {
+        val now = LocalDateTime.now()
+        val blank = now.toLocalDate().atStartOfDay()
+        val firstSunday = TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)
+        val dstStartThis = blank.withMonth(3).with(firstSunday).plusWeeks(1)
+        val dstEndThis = blank.withMonth(11).with(firstSunday)
+        val dstEndPrev = blank.minusYears(1).withMonth(11).with(firstSunday)
+        val dstStartNext = blank.plusYears(1).withMonth(3).with(firstSunday).plusWeeks(1)
+
+        val (start, end, isDst) = when {
+            now < dstStartThis -> Triple(dstEndPrev, dstStartThis, false)
+            now < dstEndThis -> Triple(dstStartThis, dstEndThis, true)
+            else -> Triple(dstEndThis, dstStartNext, false)
+        }
+
+        val totalPeriod = Duration.between(start, end).toMillis().toDouble()
+        val thisPeriod = Duration.between(start, now).toMillis().toDouble()
+        val completion = thisPeriod / totalPeriod
+        val hour = 60.0 * 60.0
+        val adjustment = completion * hour
+
+        return when {
+            isDst -> hour - adjustment
+            else -> adjustment
+        }
+    }
+
     private fun initLocation() {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager?
         try {
@@ -73,13 +100,23 @@ class ClockActivity : AppCompatActivity() {
         val blankTime = getString(R.string.empty_time)
         val format = DateTimeFormatter.ofPattern("h:mm:ss a")
         val utcTime = LocalTime.now(ZoneId.of("UTC"))
-        val integralTime = location?.let {
-            utcTime.plusSeconds(longitudeToSeconds(it).toLong())
+
+        val integralSeconds = location?.let {
+            longitudeToSeconds(it).toLong()
+        }
+        val dstSeconds = dstToSeconds().toLong()
+
+        val integralTime = integralSeconds?.let {
+            utcTime.plusSeconds(it)
+        }
+        val dstTime = utcTime.plusSeconds(dstSeconds)
+        val realTime = integralSeconds?.let {
+            utcTime.plusSeconds(it + dstSeconds)
         }
 
         utcTimeTextView.text = utcTime.format(format)
         integralTimeTextView.text = integralTime?.format(format) ?: blankTime
-        dstTimeTextView.text = blankTime
-        realTimeTextView.text = blankTime
+        dstTimeTextView.text = dstTime.format(format)
+        realTimeTextView.text = realTime?.format(format) ?: blankTime
     }
 }
