@@ -23,6 +23,7 @@ class ClockActivity : AppCompatActivity() {
         const val LOC_UPDATE_FASTEST: Long = 2 * 1000
         const val CHECK_LOCATION_PERMISSION = 1
         const val TAG = "ClockActivity"
+        val FIRST_SUNDAY = TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)
     }
 
     private lateinit var utcTimeTextView: TextView
@@ -74,14 +75,16 @@ class ClockActivity : AppCompatActivity() {
         stopLocationUpdates()
     }
 
+    private fun dstBegin(year: Int) = LocalDate.of(year, 3, 1).with(FIRST_SUNDAY).plusWeeks(1).atStartOfDay()
+
+    private fun dstEnd(year: Int) = LocalDate.of(year, 11, 1).with(FIRST_SUNDAY).atStartOfDay()
+
     private fun dstToSeconds(): Double {
         val now = LocalDateTime.now()
-        val blank = now.toLocalDate().atStartOfDay()
-        val firstSunday = TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)
-        val dstStartThis = blank.withMonth(3).with(firstSunday).plusWeeks(1)
-        val dstEndThis = blank.withMonth(11).with(firstSunday)
-        val dstEndPrev = blank.minusYears(1).withMonth(11).with(firstSunday)
-        val dstStartNext = blank.plusYears(1).withMonth(3).with(firstSunday).plusWeeks(1)
+        val dstStartThis = dstBegin(now.year)
+        val dstEndThis = dstEnd(now.year)
+        val dstEndPrev = dstEnd(now.minusYears(1).year)
+        val dstStartNext = dstBegin(now.plusYears(1).year)
 
         val (start, end, isDst) = when {
             now < dstStartThis -> Triple(dstEndPrev, dstStartThis, false)
