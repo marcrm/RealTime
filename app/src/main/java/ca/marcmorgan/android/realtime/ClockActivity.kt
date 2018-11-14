@@ -1,9 +1,13 @@
 package ca.marcmorgan.android.realtime
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.widget.TextView
 import com.google.android.gms.location.*
@@ -17,6 +21,7 @@ class ClockActivity : AppCompatActivity() {
         const val UPDATE_MS: Long = 100
         const val LOC_UPDATE_MS: Long = 10 * 1000
         const val LOC_UPDATE_FASTEST: Long = 2 * 1000
+        const val CHECK_LOCATION_PERMISSION = 1
         const val TAG = "ClockActivity"
     }
 
@@ -53,6 +58,7 @@ class ClockActivity : AppCompatActivity() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        checkLocationPermissions()
         initLocation()
         updateTime()
         initTimer()
@@ -92,6 +98,27 @@ class ClockActivity : AppCompatActivity() {
         return when {
             isDst -> hour - adjustment
             else -> adjustment
+        }
+    }
+
+    private fun checkLocationPermissions() {
+        val allowed = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if(allowed == PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), CHECK_LOCATION_PERMISSION)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when(requestCode) {
+            CHECK_LOCATION_PERMISSION -> {
+                initLocation()
+                stopLocationUpdates()
+                startLocationUpdate()
+            }
+            else -> {}
         }
     }
 
