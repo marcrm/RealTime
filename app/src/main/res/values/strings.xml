@@ -6,4 +6,10 @@
     <string name="dst_label">DST Integral Time</string>
     <string name="realtime_label">RealTime</string>
     <string name="empty_time">--:--</string>
+
+    <string name="credits_title">Credits</string>
+    <string name="credits">App Icon
+    \nclock map pin by Yugudesign from the Noun Project
+    </string>
+    <string name="ok">OK</string>
 </resources>

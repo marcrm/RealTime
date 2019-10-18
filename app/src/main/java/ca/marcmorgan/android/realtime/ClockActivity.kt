@@ -9,7 +9,10 @@ import android.os.Handler
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.location.*
 import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
@@ -65,6 +68,11 @@ class ClockActivity : AppCompatActivity() {
         initTimer()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_clock, menu)
+        return true
+    }
+
     override fun onResume() {
         super.onResume()
         startLocationUpdate()
@@ -73,6 +81,25 @@ class ClockActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         stopLocationUpdates()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.menu_clock_credits -> {
+                showCredits()
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun showCredits() {
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(R.string.credits_title)
+            .setMessage(R.string.credits)
+            .setPositiveButton(R.string.ok, null)
+            .create()
+        dialog.show()
     }
 
     private fun dstBegin(year: Int) = LocalDate.of(year, 3, 1).with(FIRST_SUNDAY).plusWeeks(1).atStartOfDay()
