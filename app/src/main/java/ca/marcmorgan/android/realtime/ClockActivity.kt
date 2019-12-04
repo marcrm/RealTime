@@ -26,7 +26,6 @@ class ClockActivity : AppCompatActivity() {
         const val LOC_UPDATE_FASTEST: Long = 2 * 1000
         const val CHECK_LOCATION_PERMISSION = 1
         const val TAG = "ClockActivity"
-        val FIRST_SUNDAY = TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)
     }
 
     private lateinit var utcTimeTextView: TextView
@@ -34,6 +33,8 @@ class ClockActivity : AppCompatActivity() {
     private lateinit var dstTimeTextView: TextView
     private lateinit var realTimeTextView: TextView
     private val refreshHandler = Handler()
+
+    private val dstHelper = DSTHelper()
 
     private var location: Location? = null
     private val locationRequest = LocationRequest().apply {
@@ -102,35 +103,6 @@ class ClockActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun dstBegin(year: Int) = LocalDate.of(year, 3, 1).with(FIRST_SUNDAY).plusWeeks(1).atStartOfDay()
-
-    private fun dstEnd(year: Int) = LocalDate.of(year, 11, 1).with(FIRST_SUNDAY).atStartOfDay()
-
-    private fun dstToSeconds(): Duration {
-        val now = LocalDateTime.now()
-        val dstStartThis = dstBegin(now.year)
-        val dstEndThis = dstEnd(now.year)
-        val dstEndPrev = dstEnd(now.minusYears(1).year)
-        val dstStartNext = dstBegin(now.plusYears(1).year)
-
-        val (start, end, isDst) = when {
-            now < dstStartThis -> Triple(dstEndPrev, dstStartThis, false)
-            now < dstEndThis -> Triple(dstStartThis, dstEndThis, true)
-            else -> Triple(dstEndThis, dstStartNext, false)
-        }
-
-        val totalPeriod = Duration.between(start, end).toMillis().toDouble()
-        val thisPeriod = Duration.between(start, now).toMillis().toDouble()
-        val completion = thisPeriod / totalPeriod
-        val hour = 60.0 * 60.0 * 1000.0
-        val adjustment = completion * hour
-
-        return when {
-            isDst -> hour - adjustment
-            else -> adjustment
-        }.let { Duration.ofMillis(it.toLong()) }
-    }
-
     private fun checkLocationPermissions() {
         val allowed = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         if(allowed == PackageManager.PERMISSION_GRANTED) {
@@ -193,7 +165,7 @@ class ClockActivity : AppCompatActivity() {
         val utcTime = LocalTime.now(ZoneId.of("UTC"))
 
         val integralDuration = location?.let { longitudeToSeconds(it) }
-        val dstDuration = dstToSeconds()
+        val dstDuration = dstHelper.dstToSeconds(LocalDateTime.now())
 
         val integralTime = integralDuration?.let { utcTime.plus(integralDuration) }
         val dstTime = utcTime.plus(dstDuration)
