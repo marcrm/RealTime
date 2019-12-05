@@ -1,40 +1,25 @@
 package ca.marcmorgan.android.realtime
 
-import org.threeten.bp.DayOfWeek
-import org.threeten.bp.Duration
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.temporal.TemporalAdjusters
+import org.threeten.bp.*
+import kotlin.math.absoluteValue
 
 class DSTHelper {
-    companion object {
-        val FIRST_SUNDAY = TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)
-    }
+    fun dstToSeconds(now: ZonedDateTime): Duration {
+        val tz = now.zone
+        val prevTransition = tz.rules.previousTransition(now.toInstant())
+        val nextTransition = tz.rules.nextTransition(now.toInstant())
 
-    private fun dstBegin(year: Int) = LocalDate.of(year, 3, 1).with(FIRST_SUNDAY).plusWeeks(1).atStartOfDay()
-
-    private fun dstEnd(year: Int) = LocalDate.of(year, 11, 1).with(FIRST_SUNDAY).atStartOfDay()
-
-    fun dstToSeconds(now: LocalDateTime): Duration {
-        val dstStartThis = dstBegin(now.year)
-        val dstEndThis = dstEnd(now.year)
-        val dstEndPrev = dstEnd(now.minusYears(1).year)
-        val dstStartNext = dstBegin(now.plusYears(1).year)
-
-        val (start, end, isDst) = when {
-            now < dstStartThis -> Triple(dstEndPrev, dstStartThis, false)
-            now < dstEndThis -> Triple(dstStartThis, dstEndThis, true)
-            else -> Triple(dstEndThis, dstStartNext, false)
-        }
-
+        val start = prevTransition.dateTimeAfter
+        val end = nextTransition.dateTimeBefore
         val totalPeriod = Duration.between(start, end).toMillis().toDouble()
         val thisPeriod = Duration.between(start, now).toMillis().toDouble()
         val completion = thisPeriod / totalPeriod
-        val hour = 60.0 * 60.0 * 1000.0
-        val adjustment = completion * hour
+
+        val offset = (nextTransition.offsetAfter.totalSeconds - nextTransition.offsetBefore.totalSeconds) * 1000
+        val adjustment = completion * offset
 
         return when {
-            isDst -> hour - adjustment
+            adjustment < 0 -> offset.absoluteValue + adjustment
             else -> adjustment
         }.let { Duration.ofMillis(it.toLong()) }
     }

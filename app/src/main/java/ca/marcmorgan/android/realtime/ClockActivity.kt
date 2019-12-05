@@ -165,7 +165,7 @@ class ClockActivity : AppCompatActivity() {
         val utcTime = LocalTime.now(ZoneId.of("UTC"))
 
         val integralDuration = location?.let { longitudeToSeconds(it) }
-        val dstDuration = dstHelper.dstToSeconds(LocalDateTime.now())
+        val dstDuration = dstHelper.dstToSeconds(ZonedDateTime.now())
 
         val integralTime = integralDuration?.let { utcTime.plus(integralDuration) }
         val dstTime = utcTime.plus(dstDuration)
