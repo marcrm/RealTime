@@ -13,10 +13,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import ca.marcmorgan.android.realtime.extensions.prettyString
 import com.google.android.gms.location.*
 import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.temporal.TemporalAdjusters
 
 class ClockActivity : AppCompatActivity() {
 
@@ -29,8 +29,8 @@ class ClockActivity : AppCompatActivity() {
     }
 
     private lateinit var utcTimeTextView: TextView
-    private lateinit var integralTimeTextView: TextView
-    private lateinit var dstTimeTextView: TextView
+    private lateinit var locationDurationTextView: TextView
+    private lateinit var dstDurationTextView: TextView
     private lateinit var realTimeTextView: TextView
     private val refreshHandler = Handler()
 
@@ -57,8 +57,8 @@ class ClockActivity : AppCompatActivity() {
         setContentView(R.layout.activity_clock)
 
         utcTimeTextView = findViewById(R.id.clock_utc_time)
-        integralTimeTextView = findViewById(R.id.clock_integral_time)
-        dstTimeTextView = findViewById(R.id.clock_dst_time)
+        locationDurationTextView = findViewById(R.id.clock_location_duration)
+        dstDurationTextView = findViewById(R.id.clock_dst_duration)
         realTimeTextView = findViewById(R.id.clock_realtime_time)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -172,8 +172,8 @@ class ClockActivity : AppCompatActivity() {
         val realTime = integralDuration?.let { utcTime.plus(it + dstDuration) }
 
         utcTimeTextView.text = utcTime.format(format)
-        integralTimeTextView.text = integralTime?.format(format) ?: blankTime
-        dstTimeTextView.text = dstTime.format(format)
+        locationDurationTextView.text = integralDuration?.prettyString() ?: blankTime
+        dstDurationTextView.text = dstDuration.prettyString()
         realTimeTextView.text = realTime?.format(format) ?: blankTime
     }
 }
