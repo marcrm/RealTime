@@ -162,13 +162,18 @@ class ClockActivity : AppCompatActivity() {
     private fun updateTime() {
         val blankTime = getString(R.string.empty_time)
         val format = DateTimeFormatter.ofPattern("h:mm:ss a")
-        val utcTime = LocalTime.now(ZoneId.of("UTC"))
+        val now = ZonedDateTime.now()
+        val zoneRules = now.zone.rules
+        val utcTime = now.withZoneSameInstant(ZoneOffset.UTC)
+        val nowNoDst = now.withZoneSameInstant(zoneRules.getStandardOffset(now.toInstant()))
+        val dstAdjust = zoneRules.getDaylightSavings(now.toInstant())
 
         val integralDuration = location?.let { longitudeToSeconds(it) }
-        val dstDuration = dstHelper.dstToSeconds(ZonedDateTime.now())
+        val dstDuration = dstHelper.dstToSeconds(now)
 
-        val integralTime = integralDuration?.let { utcTime.plus(integralDuration) }
-        val dstTime = utcTime.plus(dstDuration)
+        val integralTime = integralDuration?.let { utcTime.plus(it) }
+        val integralTimeDst = integralTime?.plus(dstAdjust)
+        val dstTime = nowNoDst.plus(dstDuration)
         val realTime = integralDuration?.let { utcTime.plus(it + dstDuration) }
 
         utcTimeTextView.text = utcTime.format(format)
