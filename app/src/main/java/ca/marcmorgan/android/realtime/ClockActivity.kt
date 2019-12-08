@@ -31,6 +31,9 @@ class ClockActivity : AppCompatActivity() {
     private lateinit var utcTimeTextView: TextView
     private lateinit var locationDurationTextView: TextView
     private lateinit var dstDurationTextView: TextView
+    private lateinit var tzIntegralNoDstTextView: TextView
+    private lateinit var tzIntegralDstTextView: TextView
+    private lateinit var dstIntegralTextView: TextView
     private lateinit var realTimeTextView: TextView
     private val refreshHandler = Handler()
 
@@ -59,6 +62,9 @@ class ClockActivity : AppCompatActivity() {
         utcTimeTextView = findViewById(R.id.clock_utc_time)
         locationDurationTextView = findViewById(R.id.clock_location_duration)
         dstDurationTextView = findViewById(R.id.clock_dst_duration)
+        tzIntegralNoDstTextView = findViewById(R.id.clock_tz_integral_no_dst_time)
+        tzIntegralDstTextView = findViewById(R.id.clock_tz_integral_dst_time)
+        dstIntegralTextView = findViewById(R.id.clock_dst_integral_time)
         realTimeTextView = findViewById(R.id.clock_realtime_time)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -179,6 +185,9 @@ class ClockActivity : AppCompatActivity() {
         utcTimeTextView.text = utcTime.format(format)
         locationDurationTextView.text = integralDuration?.prettyString() ?: blankTime
         dstDurationTextView.text = dstDuration.prettyString()
+        tzIntegralNoDstTextView.text = integralTime?.format(format) ?: blankTime
+        tzIntegralDstTextView.text = integralTimeDst?.format(format) ?: blankTime
+        dstIntegralTextView.text = dstTime.format(format)
         realTimeTextView.text = realTime?.format(format) ?: blankTime
     }
 }

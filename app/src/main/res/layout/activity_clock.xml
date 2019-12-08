@@ -2,7 +2,6 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ClockActivity"
@@ -59,6 +58,57 @@
             android:layout_gravity="center_horizontal"
             tools:text="@string/empty_time"
     />
+
+    <TextView
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/tz_integral_no_dst_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            />
+
+    <TextView
+            android:id="@+id/clock_tz_integral_no_dst_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            tools:text="@string/empty_time"
+            />
+
+    <TextView
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/tz_integral_dst_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            />
+
+    <TextView
+            android:id="@+id/clock_tz_integral_dst_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            tools:text="@string/empty_time"
+            />
+
+    <TextView
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/dst_integral_label"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            />
+
+    <TextView
+            android:id="@+id/clock_dst_integral_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            tools:text="@string/empty_time"
+            />
 
     <TextView
             android:layout_marginTop="16dp"

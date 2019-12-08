@@ -4,6 +4,9 @@
     <string name="utc_label">UTC Time</string>
     <string name="integral_label">Time Zone Integral Duration</string>
     <string name="dst_label">DST Integral Duration</string>
+    <string name="tz_integral_no_dst_label">Time Zone Integral Time, No DST</string>
+    <string name="tz_integral_dst_label">Time Zone Integral Time, Normal DST</string>
+    <string name="dst_integral_label">DST Integral Time</string>
     <string name="realtime_label">RealTime</string>
     <string name="empty_time">--:--</string>
 
