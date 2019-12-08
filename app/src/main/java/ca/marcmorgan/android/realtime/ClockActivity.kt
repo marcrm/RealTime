@@ -13,9 +13,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import ca.marcmorgan.android.realtime.extensions.prettyString
 import com.google.android.gms.location.*
-import org.threeten.bp.*
+import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
 class ClockActivity : AppCompatActivity() {
@@ -36,8 +35,6 @@ class ClockActivity : AppCompatActivity() {
     private lateinit var dstIntegralTextView: TextView
     private lateinit var realTimeTextView: TextView
     private val refreshHandler = Handler()
-
-    private val dstHelper = DSTHelper()
 
     private var location: Location? = null
     private val locationRequest = LocationRequest().apply {
@@ -162,32 +159,18 @@ class ClockActivity : AppCompatActivity() {
         refreshHandler.postDelayed(updateRunnable, UPDATE_MS)
     }
 
-    private fun longitudeToSeconds(loc: Location) =
-        Duration.ofMillis(((loc.longitude / 180.0) * 12 * 60 * 60 * 1000).toLong())
-
     private fun updateTime() {
         val blankTime = getString(R.string.empty_time)
         val format = DateTimeFormatter.ofPattern("h:mm:ss a")
         val now = ZonedDateTime.now()
-        val zoneRules = now.zone.rules
-        val utcTime = now.withZoneSameInstant(ZoneOffset.UTC)
-        val nowNoDst = now.withZoneSameInstant(zoneRules.getStandardOffset(now.toInstant()))
-        val dstAdjust = zoneRules.getDaylightSavings(now.toInstant())
+        val calculator = TimeCalculator(now, location, format, blankTime)
 
-        val integralDuration = location?.let { longitudeToSeconds(it) }
-        val dstDuration = dstHelper.dstToSeconds(now)
-
-        val integralTime = integralDuration?.let { utcTime.plus(it) }
-        val integralTimeDst = integralTime?.plus(dstAdjust)
-        val dstTime = nowNoDst.plus(dstDuration)
-        val realTime = integralDuration?.let { utcTime.plus(it + dstDuration) }
-
-        utcTimeTextView.text = utcTime.format(format)
-        locationDurationTextView.text = integralDuration?.prettyString() ?: blankTime
-        dstDurationTextView.text = dstDuration.prettyString()
-        tzIntegralNoDstTextView.text = integralTime?.format(format) ?: blankTime
-        tzIntegralDstTextView.text = integralTimeDst?.format(format) ?: blankTime
-        dstIntegralTextView.text = dstTime.format(format)
-        realTimeTextView.text = realTime?.format(format) ?: blankTime
+        utcTimeTextView.text = calculator.utcTimeText
+        locationDurationTextView.text = calculator.locationDurationText
+        dstDurationTextView.text = calculator.dstDurationText
+        tzIntegralNoDstTextView.text = calculator.integralTimeText
+        tzIntegralDstTextView.text = calculator.integralTimeDstText
+        dstIntegralTextView.text = calculator.dstTimeText
+        realTimeTextView.text = calculator.realTimeText
     }
 }
