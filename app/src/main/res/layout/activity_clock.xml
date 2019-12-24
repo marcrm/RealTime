@@ -15,6 +15,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/utc_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
     />
 
     <TextView
@@ -32,6 +33,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/integral_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
     />
 
     <TextView
@@ -49,6 +51,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/dst_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
     />
 
     <TextView
@@ -66,6 +69,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/tz_integral_no_dst_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
             />
 
     <TextView
@@ -83,6 +87,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/tz_integral_dst_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
             />
 
     <TextView
@@ -100,6 +105,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/dst_integral_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
             />
 
     <TextView
@@ -117,6 +123,7 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/realtime_label"
             android:textAppearance="@android:style/TextAppearance.Large"
+            android:textAlignment="center"
     />
 
     <TextView
